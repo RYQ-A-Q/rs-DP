@@ -4,4 +4,7 @@ DP->Design pattern
 
 ## [开始阅读设计模式](./DesignPattern/designMode/README.md)
 
+
+相关cocos代码案例见：[**rsLearn**](https://github.com/RYQ-A-Q/rsLearn.git)的设计模式部分
+
 正在持续更新中...
