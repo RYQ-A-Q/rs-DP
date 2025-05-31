@@ -1,7 +1,8 @@
 # 创建型模式
 
+[TOC]
 
-## 1 单例模式
+## 1 单例模式(singleton)
 
 ### 1.1 描述和结构
 
@@ -212,7 +213,265 @@ console.log(config.get("volume")); // 80
 | **不利于测试**       | 因为是全局状态，写单元测试时容易受到之前测试的污染。应提供 `reset()` 等方法模拟干净环境。 |
 | **注意内存泄漏**     | 如果单例中保存了大量引用对象，且生命周期过长，要注意及时清理无用数据。 |
 
+---
 
 
 
+## 2 工厂模式（Factory Pattern）
+
+### 2.1 描述和结构
+
+工厂模式是一类用于**封装对象创建**过程的创建型设计模式，屏蔽实例化细节，将对象创建延迟到子类或工厂方法中。
+ 核心思想是：**不直接 new 对象，交由工厂创建**。
+
+应用场景：
+
+- 解耦客户端与具体类依赖
+- 封装变化的对象创建逻辑
+- 新产品扩展时无需修改客户端代码
+
+```mermaid
+classDiagram
+    direction TB
+    class Product {
+        <<interface>>
+        +use(): void
+    }
+    class ConcreteProductA {
+        +use(): void
+    }
+    class ConcreteProductB {
+        +use(): void
+    }
+    class Factory {
+        <<interface>>
+        +createProduct(): Product
+    }
+    class ConcreteFactoryA {
+        +createProduct(): Product
+    }
+    class ConcreteFactoryB {
+        +createProduct(): Product
+    }
+    Factory <|.. ConcreteFactoryA
+    Factory <|.. ConcreteFactoryB
+    Product <|.. ConcreteProductA
+    Product <|.. ConcreteProductB
+```
+
+------
+
+### 2.2 分类对比
+
+| 类型         | 简单工厂         | 工厂方法            | 抽象工厂                    |
+| ------------ | ---------------- | ------------------- | --------------------------- |
+| 创建者角色   | 单一工厂类       | 工厂接口+多个工厂类 | 抽象工厂接口+多个具体工厂类 |
+| 新增产品支持 | 修改工厂类       | 新增工厂类          | 新增工厂类和产品接口        |
+| 抽象层次     | 工厂 + 产品接口  | 工厂接口 + 产品接口 | 工厂接口 + 多个产品接口     |
+| 开闭原则     | 违背（修改工厂） | 遵守                | 遵守                        |
+| 产品族支持   | 不支持           | 不支持              | 支持                        |
+| 客户端依赖   | 依赖具体产品     | 依赖抽象工厂接口    | 依赖抽象工厂接口和产品接口  |
+
+------
+
+### 2.3 用途
+
+| 领域       | 示例                                            |
+| ---------- | ----------------------------------------------- |
+| UI 框架    | 主题工厂生成不同风格按钮、输入框等              |
+| 数据库连接 | MySQLFactory / OracleFactory 创建数据库连接实例 |
+| 游戏开发   | 生成不同角色、装备、场景元素                    |
+| 报表导出   | PDF、Excel、HTML 格式报表创建                   |
+| 订单系统   | 普通订单、促销订单、团购订单创建                |
+
+------
+
+### 2.4 创建方式对比
+
+| 类型     | 创建方式描述                   | 扩展性 | 简单性       |
+| -------- | ------------------------------ | ------ | ------------ |
+| 简单工厂 | 通过条件判断一个类创建所有产品 | 低     | 高           |
+| 工厂方法 | 每个产品对应一个具体工厂类     | 高     | 中           |
+| 抽象工厂 | 一个工厂创建一族相关产品       | 非常高 | 中（接口多） |
+
+------
+
+### 2.5 代码示例（TypeScript）
+
+#### 2.5.1 简单工厂(Simple Factory)
+
+```ts
+interface Bread {
+    eat(): void;
+}
+
+class WhiteBread implements Bread {
+    eat() {
+        console.log("吃白面包");
+    }
+}
+
+class WheatBread implements Bread {
+    eat() {
+        console.log("吃全麦面包");
+    }
+}
+
+class BreadFactory {
+    static createBread(type: string): Bread {
+        if (type === "white") {
+            return new WhiteBread();
+        } else if (type === "wheat") {
+            return new WheatBread();
+        } else {
+            throw new Error("无效面包类型");
+        }
+    }
+}
+
+// 使用
+const bread = BreadFactory.createBread("white");
+bread.eat();
+```
+
+------
+
+#### 2.5.2 工厂方法(Factory Method)
+
+```ts
+interface Bread {
+    eat(): void;
+}
+
+class WhiteBread implements Bread {
+    eat() {
+        console.log("吃白面包");
+    }
+}
+
+class WheatBread implements Bread {
+    eat() {
+        console.log("吃全麦面包");
+    }
+}
+
+interface BreadFactory {
+    createBread(): Bread;
+}
+
+class WhiteBreadFactory implements BreadFactory {
+    createBread(): Bread {
+        return new WhiteBread();
+    }
+}
+
+class WheatBreadFactory implements BreadFactory {
+    createBread(): Bread {
+        return new WheatBread();
+    }
+}
+
+// 使用
+const factory: BreadFactory = new WhiteBreadFactory();
+const bread = factory.createBread();
+bread.eat();
+```
+
+------
+
+#### 2.5.3 抽象工厂(Abstract Factory)
+
+```ts
+interface Bread {
+    eat(): void;
+}
+
+interface Drink {
+    drink(): void;
+}
+
+class WhiteBread implements Bread {
+    eat() {
+        console.log("吃白面包");
+    }
+}
+
+class WheatBread implements Bread {
+    eat() {
+        console.log("吃全麦面包");
+    }
+}
+
+class Tea implements Drink {
+    drink() {
+        console.log("喝茶");
+    }
+}
+
+class Coffee implements Drink {
+    drink() {
+        console.log("喝咖啡");
+    }
+}
+
+interface BreakfastFactory {
+    createBread(): Bread;
+    createDrink(): Drink;
+}
+
+class WhiteBreakfastFactory implements BreakfastFactory {
+    createBread(): Bread {
+        return new WhiteBread();
+    }
+    createDrink(): Drink {
+        return new Tea();
+    }
+}
+
+class WheatBreakfastFactory implements BreakfastFactory {
+    createBread(): Bread {
+        return new WheatBread();
+    }
+    createDrink(): Drink {
+        return new Coffee();
+    }
+}
+
+// 使用
+function serveBreakfast(factory: BreakfastFactory) {
+    const bread = factory.createBread();
+    const drink = factory.createDrink();
+    bread.eat();
+    drink.drink();
+}
+
+serveBreakfast(new WhiteBreakfastFactory());
+serveBreakfast(new WheatBreakfastFactory());
+```
+
+------
+
+### 2.6 优缺点
+
+| 优点                               | 缺点                                 |
+| ---------------------------------- | ------------------------------------ |
+| 解耦客户端与具体类依赖             | 增加类数量，结构复杂                 |
+| 方便新增产品，无需修改客户端代码   | 简单工厂违背开闭原则                 |
+| 满足开闭原则（工厂方法、抽象工厂） | 抽象工厂扩展困难，需修改所有相关工厂 |
+| 封装创建细节，隐藏复杂性           | 客户端仍需决定使用哪个工厂           |
+| 支持产品族同时创建（抽象工厂）     | 工厂层接口多，理解成本高             |
+
+------
+
+### 2.7 注意事项
+
+| 注意点     | 说明                                   |
+| ---------- | -------------------------------------- |
+| 开闭原则   | 简单工厂违背，工厂方法和抽象工厂遵守   |
+| 命名规范   | 工厂类通常以 `Factory` 结尾            |
+| 扩展优化   | 可用注册表、反射消除硬编码，提高灵活性 |
+| 组合使用   | 工厂方法+抽象工厂适合复杂产品结构      |
+| 产品族耦合 | 抽象工厂耦合产品族，变化时需慎重       |
+
+---
 

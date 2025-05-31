@@ -21,7 +21,7 @@
 | 模式名称                     | 已梳理 | 代码示例 |
 | :--------------------------- | ------ | -------- |
 | 单例（Singleton）            | ✓      | ✓        |
-| 工厂方法（Factory Method）   |        |          |
+| 工厂方法（Factory Method）   | ✓      | ✓        |
 | 抽象工厂（Abstract Factory） |        |          |
 | 建造者（Builder）            |        |          |
 | 原型（Prototype）            |        |          |
